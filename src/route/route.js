@@ -1,11 +1,14 @@
 const express = require('express');
+const userController = require('../controllers/userController');
+const mw = require('../middleware/middleware');
+
 const router = express.Router();
-import {createUser,loginUser} from '../controllers/userController';
+
 
 // ================ user api ===========================================================================================//
 
-router.post('/register',createUser)
-router.post('/login',loginUser)
+router.post('/register',userController.createUser)
+router.post('/login',userController.loginUser)
 
 // ========================export =======================================================================================//
 

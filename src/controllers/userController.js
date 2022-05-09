@@ -1,64 +1,65 @@
 const userModel = require('../models/userModel');
-import {isValidEmail, isValidField,isValidMobileNo,isValidRequestBody,isValidTitle} from '../validators/validator';
+const jwt = require('jsonwebtoken');
+const validators =require('../validators/validator');
 
 const createUser = async function(req,res)
 {
     try
     {
-        if(!isValidRequestBody(req.body))
+        if(!validators.isValidRequestBody(req.body))
 
         return res.status(400).send({status : false, message : "Invalid request parameter. Please provide user details in request body."});
     
         let {title,name,phone,email,password,address} = req.body;
-        if(!isValidField(title))
+        if(!validators.isValidField(title))
         
             return res.status(400).send({status : false, message : "Title is required."});
 
-        if(!isValidTitle(title))
+        if(!validators.isValidTitle(title))
         
             return res.status(400).send({status : false, message : "Invalid title. Title can only be either 'Mr', 'Mrs', or 'Miss'."});
 
-        if(!isValidField(name))
+        if(!validators.isValidField(name))
         
             return res.status(400).send({status : false, message : "User Name is required."});
         
-        if(!isValidField(phone))
+        if(!validators.isValidField(phone))
         
             return res.status(400).send({status : false, message : "Phone Number is required."});
         
-        if(!isValidMobileNo(phone))
+        if(!validators.isValidMobileNo(phone))
         
             return res.status(400).send({status : false, message : "Invalid phone number. Please enter a valid Indian phone number."});
         
-        let mobileAlreadyExists = await userModel.findOne(phone);
+        let mobileAlreadyExists = await userModel.findOne({phone});
         if(mobileAlreadyExists)
         
             return res.status(400).send({status : false, message : "Phone number has already been used."});
         
-        if(!isValidField(email))
+        if(!validators.isValidField(email))
 
             return res.status(400).send({status : false, message : "Email is required."});
 
-        if(!isValidEmail(email))
+        if(!validators.isValidEmail(email))
 
             return res.status(400).send({status : false, message : "Email is invalid."});
 
-        let emailAlreadyExists = await userModel.findOne(email);
+        let emailAlreadyExists = await userModel.findOne({email});
         if(emailAlreadyExists)
 
             return res.status(400).send({status : false, message : "Email has already been registered."});
 
-        if(!isValidField(password))
+        if(!validators.isValidField(password))
 
             return res.status(400).send({status : false, message : "Password is required."});
 
-        if(!isValidPassword(password))
+        if(!validators.isValidPassword(password))
 
             return res.status(400).send({status : false, message : "Password should consist a minimum of 8 characters and a maximum of 15 characters."});
 
         let userDetails = {title,name,phone,email,password,address};
         let newUser = await userModel.create(userDetails);
-        res.status(201).send({status : true, data : newUser});
+        res.status(201).send({status : true,message : "User created successfully.", data : newUser});
     }
     catch(err)
     {
@@ -75,7 +76,7 @@ const loginUser = async function (req, res)
 
         // request body validation 
 
-        if (!isValidRequestBody(requestBody)) {
+        if (!validators.isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide login details' })
             return
         }
@@ -84,13 +85,13 @@ const loginUser = async function (req, res)
 
             // email id or password is velid or not check validation 
 
-            let userEmail = await userModels.findOne({ email: requestBody.email });
+            let userEmail = await userModel.findOne({ email: requestBody.email });
 
             if (!userEmail) {
                 return res.status(400).send({ status: true, msg: "Invalid user email" })
             }
 
-            let userPassword = await userModels.findOne({ password: requestBody.password });
+            let userPassword = await userModel.findOne({ password: requestBody.password });
 
             if (!userPassword) {
                 return res.status(400).send({ status: true, msg: "Invalid user password" })
@@ -100,7 +101,7 @@ const loginUser = async function (req, res)
 
             let payload = { _id: userEmail._id }
 
-            let token = jwt.sign(payload, 'projectfourth', { expiresIn: '1800s' })
+            let token = jwt.sign(payload, 'projectThird', { expiresIn: '1800s' })
 
             res.header('x-api-key', token);
 
