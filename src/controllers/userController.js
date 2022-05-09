@@ -11,6 +11,7 @@ const createUser = async function(req,res)
         return res.status(400).send({status : false, message : "Invalid request parameter. Please provide user details in request body."});
     
         let {title,name,phone,email,password,address} = req.body;
+
         if(!validators.isValidField(title))
         
             return res.status(400).send({status : false, message : "Title is required."});
@@ -32,6 +33,7 @@ const createUser = async function(req,res)
             return res.status(400).send({status : false, message : "Invalid phone number. Please enter a valid Indian phone number."});
         
         let mobileAlreadyExists = await userModel.findOne({phone});
+
         if(mobileAlreadyExists)
         
             return res.status(400).send({status : false, message : "Phone number has already been used."});
@@ -45,6 +47,7 @@ const createUser = async function(req,res)
             return res.status(400).send({status : false, message : "Email is invalid."});
 
         let emailAlreadyExists = await userModel.findOne({email});
+
         if(emailAlreadyExists)
 
             return res.status(400).send({status : false, message : "Email has already been registered."});
@@ -58,7 +61,9 @@ const createUser = async function(req,res)
             return res.status(400).send({status : false, message : "Password should consist a minimum of 8 characters and a maximum of 15 characters."});
 
         let userDetails = {title,name,phone,email,password,address};
+
         let newUser = await userModel.create(userDetails);
+        
         res.status(201).send({status : true,message : "User created successfully.", data : newUser});
     }
     catch(err)
@@ -71,29 +76,30 @@ const loginUser = async function (req, res)
 {
     try 
     {
-
         let requestBody = req.body
 
         // request body validation 
 
-        if (!validators.isValidRequestBody(requestBody)) {
-            res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide login details' })
-            return
-        }
+        if (!validators.isValidRequestBody(requestBody)) 
+        
+            return res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide login details' });
 
-        if (requestBody.email && requestBody.password) {
+        if (requestBody.email && requestBody.password) 
+        {
 
             // email id or password is velid or not check validation 
 
             let userEmail = await userModel.findOne({ email: requestBody.email });
 
-            if (!userEmail) {
+            if (!userEmail) 
+            {
                 return res.status(400).send({ status: true, msg: "Invalid user email" })
             }
 
             let userPassword = await userModel.findOne({ password: requestBody.password });
 
-            if (!userPassword) {
+            if (!userPassword) 
+            {
                 return res.status(400).send({ status: true, msg: "Invalid user password" })
             }
 
@@ -105,15 +111,19 @@ const loginUser = async function (req, res)
 
             res.header('x-api-key', token);
 
-            res.status(200).send({ status: true, data: " user  login successfull", token: { token } })
+            res.status(200).send({ status : true, message : "User  login successfull.", token : token })
 
-        } else {
+        } 
+        else 
+        {
 
-            res.status(400).send({ status: false, msg: "must contain email and password" })
+            return res.status(400).send({ status: false, msg: "Must contain email and password." })
             
         }
 
-    } catch (error) {
+    } 
+    catch (error) 
+    {
         res.status(500).send({ status: false, msg: error.message });
     }
 };
