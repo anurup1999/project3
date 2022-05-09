@@ -39,4 +39,9 @@ const isValidEmail = function(email)
     return (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email));
 };
 
-module.exports={isValidField,isValidRequestBody,isValidEmail,isValidMobileNo,isValidURL,isValidTitle,isValidObjectId};
+const isValidPassword = function (password)
+{
+    return (/(\d)?\w{8,15}/.test(password));
+};
+
+module.exports={isValidField,isValidRequestBody,isValidEmail,isValidMobileNo,isValidURL,isValidTitle,isValidObjectId,isValidPassword};

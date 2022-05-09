@@ -7,8 +7,6 @@ const mongoose = require('mongoose');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// const { response } = require('express');
-
 mongoose.connect("mongodb+srv://Project-3-Group:gGb2XPlJjoTrWYhB@cluster0.w5bka.mongodb.net/group3Database")
     .then(() => console.log('MongoDb is connected'))
     .catch(err => console.log(err));
