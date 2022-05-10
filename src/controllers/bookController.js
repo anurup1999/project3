@@ -125,7 +125,7 @@ const getBooks = async function (req,res)
     }
 };
 
-//============================= GET /book/:bookId route handler =========================================//
+//============================= GET /books/:bookId route handler =========================================//
 
 const getBookById = async function (req, res) 
 {
@@ -142,7 +142,7 @@ const getBookById = async function (req, res)
       if(!bookDetail)
         return res.status(404).send({status:false, message:"book not found"});
   
-      const reviewsData = await reviewModel.findOne({ bookId: bookId, isDeleted: false }).select({ _id: 1, bookId: 1, reviewedBy: 1, rating:1, review: 1, releasedAt: 1 });;
+      const reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({ _id: 1, bookId: 1, reviewedBy: 1, rating:1, review: 1, releasedAt: 1 });;
         
       return res.status(200).send({ status: true, message: 'Books list', data: {...bookDetail.toObject(),reviewsData}});
     } 
@@ -152,7 +152,7 @@ const getBookById = async function (req, res)
     }
 };
 
-//=============================== PUT /book/:bookId route handler ==========================================//
+//=============================== PUT /books/:bookId route handler ==========================================//
 
 const updateBookById = async function (req, res) 
 {
@@ -208,7 +208,7 @@ const updateBookById = async function (req, res)
     }
 };
 
-//=================================== DELETE /book/:bookId route handler =========================================//
+//=================================== DELETE /books/:bookId route handler =========================================//
 
 const deleteBookById = async function (req,res)
 {
