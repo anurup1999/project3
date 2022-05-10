@@ -1,24 +1,37 @@
+// ================ imports ===========================================================================================//
+
 const express = require('express');
+
 const userController = require('../controllers/userController');
-const bookController = require('../controllers/userController');
-const mw = require('../middleware/middleware');
+
+const bookController = require('../controllers/bookController');
+
+const middleware = require('../middleware/middleware');
 
 const router = express.Router();
-
 
 // ================ user apis ===========================================================================================//
 
 router.post('/register',userController.createUser);
+
 router.post('/login',userController.loginUser);
 
 // ================ book apis ===========================================================================================//
 
-router.post('/books',mw.authentication,bookController.createBook);
-router.get('/books',mw.authentication,bookController.getBooks);
+router.post('/books',middleware.authentication,bookController.createBook);
+
+router.get('/books',middleware.authentication,bookController.getBooks);
+
+router.get('/books/:bookId',middleware.authentication,bookController.getBookById);
+
+router.put('/books/:bookId',middleware.authentication,bookController.updateBookById);
+
+router.delete('/books/:bookId',middleware.authentication,bookController.deleteBookById);
 
 // ================ review apis ===========================================================================================//
 
 
-// ========================export =======================================================================================//
+
+// =========================== exports =======================================================================================//
 
 module.exports = router;

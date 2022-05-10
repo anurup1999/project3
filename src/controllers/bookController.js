@@ -1,83 +1,99 @@
+//=================================== imports ==========================================//
+
 const validators = require('../validators/validator');
+
 const bookModel = require('../models/');
+
 const userModel = require('../models/userModel');
+
+const reviewModel = require('../models/reviewModel');
+
 const moment = require('moment');
+
+//============================ POST /books route handler =========================================//
 
 const createBook = async function (req, res) 
 {
     try 
     {
-        const bookData = req.body;
-        const decodedToken = req.validToken;
+        const data = req.body;
 
-        if (!isValidRequestBody(bookData)) 
-            return res.status(400).send({ status: false, message: 'data required' });
+        if (!validators.isValidRequestBody(data)) 
+            return res.status(400).send({ status: false, message: 'Invalid request body. Please provide book details.' });
     
-        const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = bookData;
+        const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data;
         
         if (!validators.isValidField(title)) 
         {
-            const uniqueTitle = await bookModel.findOne({ title: title });
+            const uniqueTitle = await bookModel.findOne({title});
             
             if (uniqueTitle) 
-                return res.status(400).send({ status: false, message: 'title shoud be unique' });
+                return res.status(400).send({ status: false, message: `title : ${title} is already in use` });
             
             else 
-                return res.status(400).send({ status: false, message: 'title is required must be in string' });
+                return res.status(400).send({ status: false, message: 'title is required.' });
         }
+
         //  excerpt is a short piece taken from a book , (like brief summery )
+
         if (!validators.isValidField(excerpt)) 
-            return res.status(400).send({ status: false, message: 'excerpt is require must be in string' });
+            return res.status(400).send({ status: false, message: 'excerpt is required.' });
         
         if (!validators.isValidField(userId)) 
-            return res.status(400).send({ status: false, message: 'userId is required' });
+            return res.status(400).send({ status: false, message: 'userId is required.' });
 
         if (!validators.isValidObjectId(userId)) 
-            return res.status(400).send({ status: false, message: 'valid userId is required' });
+            return res.status(400).send({ status: false, message: 'The given userId is not a valid ObjectId.' });
+
+        const decodedToken = req.validToken;
                 
         if ( decodedToken._id != userId) 
-            return res.status(403).send({ status: false, message: 'unAuthorised access ! owner info doesnot match' });
+            return res.status(403).send({ status: false, message: 'Unauthorised access ! Owner info does not match.' });
         
         if(!validators.isValidField(ISBN))
             return res.status(400).send({status: false, message : 'ISBN is requiured.'});
 
         if(!validators.isValidISBN(ISBN))
-            return res.status(400).send({status: false, message : 'ISBN is invalid.'});
+            return res.status(400).send({status: false, message : 'Invalid ISBN.'});
 
         if (!validators.isValidField(category)) 
-            return res.status(400).send({ status: false, message: 'category is required must be in string' });
+            return res.status(400).send({ status: false, message: 'category is required.' });
         
         if (!validators.isValidField(subcategory)) 
-            return res.status(400).send('subcategory is required must be in string');
+            return res.status(400).send('subcategory is required and must be a string');
             
         if (!validators.isValidField(releasedAt)) 
-            return res.status(400).send('releasedAt is required.');
+            return res.status(400).send('releasedAt is required and must be a string.');
 
         if (!/^[0-9]{4}[-]{1}[0-1]{1}[0-9]{1}[-]{1}[0-9]{2}/.test(releasedAt)) 
-            return res.status(400).send({ status: false, message: `released date format should be YYYY-MM-DD`, });
+            return res.status(400).send({ status: false, message: `releasedAt date format should be YYYY-MM-DD`, });
         
         //validate date
+
         if (!moment(releasedAt).isValid()) 
-            return res.status(400).send({ status: false, message: 'enter a valid date' });
+            return res.status(400).send({ status: false, message: 'Enter a valid date.' });
         
         if (bookData.hasOwnProperty("reviews"))
             return res.status(400).send({ status: false, message: 'Invalid field (reviews) in request body.' });
         
-        const createBook = await bookModel.create(bookData);
-        return res.status(201).send({ status: true, message: ' book created succesfully', data: createBook });
+        const newBook = await bookModel.create(bookData);
+
+        return res.status(201).send({ status: true, message: 'Book created succesfully.', data: newBook });
     } 
     catch (error) 
     {
-        console.log(error);
         return res.status(400).send({ status: false, message: error.message });
     }
 };
+
+//================================= GET /books route handler ============================================//
 
 const getBooks = async function (req,res)
 {
     try
     {
         let filter = {isDeleted : false};
+
         if(req.query.userId!=undefined)
         {
             if(!validators.isValidObjectId(req.query.userId))
@@ -89,16 +105,15 @@ const getBooks = async function (req,res)
 
             filter['userId']=req.query.userId;
         }
-        if(req.query.category!=undefined)
-        {
+
+        if(req.query.category!=undefined)      
             filter['category']=req.query.category;
-        }
+        
         if(req.query.subcategory)
-        {
             filter['subcategory']=req.query.subcategory;
-        }
-        let review_count = await reviewModel.find({bookId : req.query.bookId}).count();
+        
         let books = await bookModel.find(filter,{ _id : 1,title : 1, excerpt : 1, userId : 1, category : 1, releasedAt : 1, reviews : 1 });
+
         if(books.length==0)
             return res.status(404).send({status:false,message:"Book(s) not found."});
 
@@ -110,6 +125,8 @@ const getBooks = async function (req,res)
     }
 };
 
+//============================= GET /book/:bookId route handler =========================================//
+
 const getBookById = async function (req, res) 
 {
     try 
@@ -120,7 +137,7 @@ const getBookById = async function (req, res)
       if(!isValidObjectId(bookId))        
         return res.status(400).send({status: false, message: `${bookId} is not a valid book id`});
   
-      const bookDetail = await bookModels.findOne({ _id: bookId, isDeleted: false });
+      const bookDetail = await bookModel.findOne({ _id: bookId, isDeleted: false });
       
       if(!bookDetail)
         return res.status(404).send({status:false, message:"book not found"});
@@ -132,11 +149,12 @@ const getBookById = async function (req, res)
     } 
     catch (error) 
     {
-  
+
         return res.status(500).send({ status: false, error: error.message });
-      
     }
 };
+
+//=============================== PUT /book/:bookId route handler ==========================================//
 
 const updateBookById = async function (req, res) 
 {
@@ -163,7 +181,7 @@ const updateBookById = async function (req, res)
       if (!bookIdCheck) 
         return res.status(404).send({ status: false, msg: 'book not exist please provie valid book id' });
   
-      let uniqueCheck = await bookModels.find({$or: [{ title: requestBody.title }, { ISBN: requestBody.ISBN }]} );
+      let uniqueCheck = await bookModel.find({$or: [{ title: requestBody.title }, { ISBN: requestBody.ISBN }]} );
       
       if (uniqueCheck.length > 0) 
         return res.status(400).send({ status: false, msg: 'title or isbn number is not unique' });
@@ -173,10 +191,8 @@ const updateBookById = async function (req, res)
       if (validators.isValidField(requestBody.title)) 
         updateObject.title =requestBody.title;
       
-  
       if (validators.isValidField(requestBody.excerpt)) 
         updateObject.excerpt =requestBody.excerpt;
-      
   
       if (validators.isValidField(requestBody.ISBN))
         updateObject.ISBN =requestBody.ISBN;
@@ -184,18 +200,17 @@ const updateBookById = async function (req, res)
       if (validators.isValidField(requestBody.releasedAt)) 
         updateObject.releasedAt =requestBody.releasedAt;
       
-      let update = await bookModels.findOneAndUpdate({ _id: bookId },updateObject , { new: true });
+      let update = await bookModel.findOneAndUpdate({ _id: bookId },updateObject , { new: true });
   
       return res.status(200).send({ status: true, message: 'sucessfully updated', data: update });
-  
     } 
     catch (error) 
     {
-  
       return res.status(500).send({ status: false, error: error.message });
-  
     }
 };
+
+//=================================== DELETE /book/:bookId route handler =========================================//
 
 const deleteBookById = async function (req,res)
 {
@@ -211,7 +226,7 @@ const deleteBookById = async function (req,res)
         if(!book)
             return res.status(404).send({status : false, message : "Book doesn't exist."});
 
-        if ( decodedToken._id != userId) 
+        if ( decodedToken._id != book.userId) 
             return res.status(403).send({ status: false, message: 'unAuthorised access ! owner info doesnot match' });
         
         await bookModel.findOneAndUpdate({_id : req.params.bookId},{isDeleted : true});
@@ -223,4 +238,6 @@ const deleteBookById = async function (req,res)
     }
 };
 
-module.exports={createBook,getBooks,getBookById,updateBookById,deleteBookById}
+//================================== exports =======================================//
+
+module.exports={createBook,getBooks,getBookById,updateBookById,deleteBookById};
