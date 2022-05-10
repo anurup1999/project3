@@ -115,14 +115,14 @@ const loginUser = async function (req, res)
 
             res.header('x-api-key', token);
 
-            res.status(200).send({ status : true, message : "User  login successfull.", token : token });
+            res.status(200).send({ status : true, message : "User  login successfull.", data : {token} });
         } 
         else 
-            return res.status(400).send({ status: false, msg: "Must contain email and password." });           
+            return res.status(400).send({ status: false, message : "Must contain email and password." });           
     } 
     catch (error) 
     {
-        return res.status(500).send({ status: false, msg: error.message });
+        return res.status(500).send({ status: false, message : error.message });
     }
 };
 

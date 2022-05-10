@@ -2,7 +2,7 @@
 
 const validators = require('../validators/validator');
 
-const bookModel = require('../models/');
+const bookModel = require('../models/bookModel');
 
 const userModel = require('../models/userModel');
 
@@ -54,7 +54,7 @@ const createBook = async function (req, res)
             return res.status(400).send({status: false, message : 'ISBN is requiured.'});
 
         if(!validators.isValidISBN(ISBN))
-            return res.status(400).send({status: false, message : 'Invalid ISBN.'});
+            return res.status(400).send({status: false, message : 'Invalid ISBN. ISBN should be in the format "<3digit prefix code>-<10 digit isbn code>"'});
 
         if (!validators.isValidField(category)) 
             return res.status(400).send({ status: false, message: 'category is required.' });
@@ -73,16 +73,16 @@ const createBook = async function (req, res)
         if (!moment(releasedAt).isValid()) 
             return res.status(400).send({ status: false, message: 'Enter a valid date.' });
         
-        if (bookData.hasOwnProperty("reviews"))
+        if (data.hasOwnProperty("reviews"))
             return res.status(400).send({ status: false, message: 'Invalid field (reviews) in request body.' });
         
-        const newBook = await bookModel.create(bookData);
+        const newBook = await bookModel.create(data);
 
         return res.status(201).send({ status: true, message: 'Book created succesfully.', data: newBook });
     } 
     catch (error) 
     {
-        return res.status(400).send({ status: false, message: error.message });
+        return res.status(500).send({ status: false, message: error.message });
     }
 };
 
@@ -100,7 +100,7 @@ const getBooks = async function (req,res)
                 return res.status(400).send({status : false, message : "Invalid request parameter. userId is invalid."});
 
             let userExists = await userModel.findById(req.query.userId);
-            if(userExists)
+            if(!userExists)
                 return res.status(404).send({status : false, message : "UserId does not belong to an existing user."});
 
             filter['userId']=req.query.userId;
@@ -134,7 +134,7 @@ const getBookById = async function (req, res)
   
       let bookId = req.params.bookId;
   
-      if(!isValidObjectId(bookId))        
+      if(!validators.isValidObjectId(bookId))        
         return res.status(400).send({status: false, message: `${bookId} is not a valid book id`});
   
       const bookDetail = await bookModel.findOne({ _id: bookId, isDeleted: false });
@@ -142,14 +142,12 @@ const getBookById = async function (req, res)
       if(!bookDetail)
         return res.status(404).send({status:false, message:"book not found"});
   
-      const reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({ _id: 1, bookId: 1, reviewedBy: 1, rating:1, review: 1, releasedAt: 1 });;
+      const reviewsData = await reviewModel.findOne({ bookId: bookId, isDeleted: false }).select({ _id: 1, bookId: 1, reviewedBy: 1, rating:1, review: 1, releasedAt: 1 });;
         
       return res.status(200).send({ status: true, message: 'Books list', data: {...bookDetail.toObject(),reviewsData}});
-  
     } 
     catch (error) 
     {
-
         return res.status(500).send({ status: false, error: error.message });
     }
 };
@@ -226,7 +224,7 @@ const deleteBookById = async function (req,res)
         if(!book)
             return res.status(404).send({status : false, message : "Book doesn't exist."});
 
-        if ( decodedToken._id != book.userId) 
+        if ( req.validToken._id != book.userId) 
             return res.status(403).send({ status: false, message: 'unAuthorised access ! owner info doesnot match' });
         
         await bookModel.findOneAndUpdate({_id : req.params.bookId},{isDeleted : true});

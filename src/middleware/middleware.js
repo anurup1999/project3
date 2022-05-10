@@ -5,7 +5,7 @@ const authentication = async function (req, res, next)
     
     try 
     { 
-        const token = req.headers['x-auth-token'];
+        const token = req.headers['x-api-key'];
         
         if (!token) 
             
