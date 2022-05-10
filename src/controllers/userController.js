@@ -33,7 +33,6 @@ const createUser = async function(req,res)
             return res.status(400).send({status : false, message : "Invalid phone number. Please enter a valid Indian phone number."});
         
         phone=phone.slice(-10);
-        console.log(phone);
         let mobileAlreadyExists = await userModel.findOne({phone});
 
         if(mobileAlreadyExists)
@@ -63,14 +62,18 @@ const createUser = async function(req,res)
             return res.status(400).send({status : false, message : "Password should consist a minimum of 8 characters and a maximum of 15 characters."});
 
         if(address!=undefined)
-
-            if(validators.isValidField(address.pincode))
-
-                if(!validators.isValidPincode)
-
-                    return res.status(400).send({status : false,message : "Pincode should be a valid pincode number."});
-                
-        let userDetails = {title,name,phone : mobile,email,password,address};
+        {
+            let {pincode}=address;
+            if(validators.isValidField(pincode))
+            {
+                console.log(pincode);
+                if(!validators.isValidPincode(pincode))
+                {
+                    return res.status(400).send({status : false,message : "Pincode should be a valid pincode number."}); 
+                }
+            }
+        }
+        let userDetails = {title,name,phone,email,password,address};
 
         let newUser = await userModel.create(userDetails);
 
