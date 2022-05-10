@@ -8,7 +8,7 @@ const createUser = async function(req,res)
     {
         if(!validators.isValidRequestBody(req.body))
 
-        return res.status(400).send({status : false, message : "Invalid request parameter. Please provide user details in request body."});
+            return res.status(400).send({status : false, message : "Invalid request parameter. Please provide user details in request body."});
     
         let {title,name,phone,email,password,address} = req.body;
 
@@ -32,6 +32,8 @@ const createUser = async function(req,res)
         
             return res.status(400).send({status : false, message : "Invalid phone number. Please enter a valid Indian phone number."});
         
+        let temp=phone.split(-10);
+        phone=temp;
         let mobileAlreadyExists = await userModel.findOne({phone});
 
         if(mobileAlreadyExists)
@@ -63,12 +65,12 @@ const createUser = async function(req,res)
         let userDetails = {title,name,phone,email,password,address};
 
         let newUser = await userModel.create(userDetails);
-        
-        res.status(201).send({status : true,message : "User created successfully.", data : newUser});
+
+        return res.status(201).send({status : true,message : "User created successfully.", data : newUser});
     }
-    catch(err)
+    catch(error)
     {
-        return res.status(500).send({status : false, message : err.message});
+        return res.status(500).send({status : false, message : error.message});
     }
 };
 
@@ -120,7 +122,6 @@ const loginUser = async function (req, res)
             return res.status(400).send({ status: false, msg: "Must contain email and password." })
             
         }
-
     } 
     catch (error) 
     {
