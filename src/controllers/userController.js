@@ -32,8 +32,8 @@ const createUser = async function(req,res)
         
             return res.status(400).send({status : false, message : "Invalid phone number. Please enter a valid Indian phone number."});
         
-        let temp=phone.split(-10);
-        phone=temp;
+        phone=phone.slice(-10);
+        console.log(phone);
         let mobileAlreadyExists = await userModel.findOne({phone});
 
         if(mobileAlreadyExists)
@@ -62,7 +62,7 @@ const createUser = async function(req,res)
 
             return res.status(400).send({status : false, message : "Password should consist a minimum of 8 characters and a maximum of 15 characters."});
 
-        let userDetails = {title,name,phone,email,password,address};
+        let userDetails = {title,name,phone : mobile,email,password,address};
 
         let newUser = await userModel.create(userDetails);
 
