@@ -44,4 +44,9 @@ const isValidPassword = function (password)
     return (/(\d)?\w{8,15}/.test(password));
 };
 
-module.exports={isValidField,isValidRequestBody,isValidEmail,isValidMobileNo,isValidURL,isValidTitle,isValidObjectId,isValidPassword};
+const isValidPincode = function (pincode)
+{
+    return (/\d{6}/.test(pincode));
+};
+
+module.exports={isValidField,isValidRequestBody,isValidEmail,isValidMobileNo,isValidURL,isValidTitle,isValidObjectId,isValidPassword,isValidPincode};

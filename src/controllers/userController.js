@@ -62,6 +62,14 @@ const createUser = async function(req,res)
 
             return res.status(400).send({status : false, message : "Password should consist a minimum of 8 characters and a maximum of 15 characters."});
 
+        if(address!=undefined)
+
+            if(validators.isValidField(address.pincode))
+
+                if(!validators.isValidPincode)
+
+                    return res.status(400).send({status : false,message : "Pincode should be a valid pincode number."});
+                
         let userDetails = {title,name,phone : mobile,email,password,address};
 
         let newUser = await userModel.create(userDetails);
