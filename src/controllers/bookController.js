@@ -99,7 +99,7 @@ const getBooks = async function (req,res)
             if(!validators.isValidObjectId(req.query.userId))
                 return res.status(400).send({status : false, message : "Invalid request parameter. userId is invalid."});
 
-            let userExists = await userModel.findById(req.query.userId);
+            let userExists = await userModel.findOne({_id : req.query.userId});
             if(!userExists)
                 return res.status(404).send({status : false, message : "UserId does not belong to an existing user."});
 

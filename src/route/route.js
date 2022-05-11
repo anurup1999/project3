@@ -2,35 +2,41 @@
 
 const express = require('express');
 
-const userController = require('../controllers/userController');
+const {createUser,loginUser} = require('../controllers/userController');
 
-const bookController = require('../controllers/bookController');
+const {createBook,getBooks,getBookById,updateBookById,deleteBookById} = require('../controllers/bookController');
 
-const middleware = require('../middleware/middleware');
+const {createReview,updateReview,deleteReview} = require('../controllers/reviewController');
+
+const {authentication} = require('../middleware/middleware');
 
 const router = express.Router();
 
 // ================ user apis ===========================================================================================//
 
-router.post('/register',userController.createUser);
+router.post('/register',createUser);
 
-router.post('/login',userController.loginUser);
+router.post('/login',loginUser);
 
 // ================ book apis ===========================================================================================//
 
-router.post('/books',middleware.authentication,bookController.createBook);
+router.post('/books',authentication,createBook);
 
-router.get('/books',middleware.authentication,bookController.getBooks);
+router.get('/books',authentication,getBooks);
 
-router.get('/books/:bookId',middleware.authentication,bookController.getBookById);
+router.get('/books/:bookId',authentication,getBookById);
 
-router.put('/books/:bookId',middleware.authentication,bookController.updateBookById);
+router.put('/books/:bookId',authentication,updateBookById);
 
-router.delete('/books/:bookId',middleware.authentication,bookController.deleteBookById);
+router.delete('/books/:bookId',authentication,deleteBookById);
 
 // ================ review apis ===========================================================================================//
 
+router.post('/books/:bookId/review',createReview);
 
+router.put('/books/:bookId/review/:reviewId',updateReview);
+
+router.delete('/books/:bookId/review/:reviewId',deleteReview);
 
 // =========================== exports =======================================================================================//
 
