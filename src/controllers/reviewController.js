@@ -1,7 +1,14 @@
+//================ imports ===============================//
+
 const bookModel = require('../models/bookModel');
+
 const reviewModel = require('../models/reviewModel');
+
 const userModel = require('../models/userModel');
+
 const validators = require('../validators/validator');
+
+//================ POST /books/:bookId/review route handler ===============================//
 
 const createReview = async function(req,res)
 {
@@ -55,6 +62,8 @@ const createReview = async function(req,res)
         return res.status(500).send( { status : false, message : error.message } );
     }
 };
+
+//================ PUT /books/:bookId/review/:reviewId route handler ===============================//
 
 const updateReview = async function(req,res)
 {
@@ -112,6 +121,8 @@ const updateReview = async function(req,res)
     }
 };
 
+//================ DELETE /books/:bookId/review/:reviewId route handler ===============================//
+
 const deleteReview = async function(req,res)
 {
     try
@@ -153,5 +164,7 @@ const deleteReview = async function(req,res)
         return res.status(500).send({status : false, message : error.message});
     }
 };
+
+//================ exports ===============================//
 
 module.exports={createReview,updateReview,deleteReview};
