@@ -43,7 +43,7 @@ const isValidEmail = function(email)
 
 const isValidPassword = function (password)
 {
-    return (/(\d)?\w{8,15}/.test(password));
+    return (/\w{8,15}/.test(password));
 };
 
 const isValidPincode = function (pincode)
