@@ -120,9 +120,25 @@ const getBooks = async function (req,res)
             filter['category']=req.query.category;
         
         if(req.query.subcategory)
-            filter['subcategory']=req.query.subcategory;
-        
-        let books = await bookModel.find(filter,{ _id : 1,title : 1, excerpt : 1, userId : 1, category : 1,  reviews : 1, releasedAt : 1 });
+        {    
+            let subcategory = req.query.subcategory;
+
+            if(/^\[(['"]\w+['"],?)+\]$/.test(subcategory))
+            {
+                let temp = JSON.parse(subcategory);
+                subcategory = temp;
+            }
+            
+            if(/((['"])?\w+(['"])?,?)+/.test(subcategory))
+            {
+                let temp = subcategory.split(',');
+                subcategory = temp;
+            }
+
+            filter['subcategory']={$in : subcategory};
+        }
+
+        let books = await bookModel.find(filter,{ _id : 1,title : 1, excerpt : 1, userId : 1, category : 1,  reviews : 1, releasedAt : 1 }).sort({title : 1});
 
         if(books.length==0)
             return res.status(404).send({status:false,message:"Book(s) not found."});

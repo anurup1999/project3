@@ -17,7 +17,7 @@ const createReview = async function(req,res)
         if(!validators.isValidRequestBody(req.body))
             return res.status(400).send({status : false, message : "Invalid request body. Please provide review details."});
         
-        if(req.params.bookId!=undefined)
+        if(req.params.bookId==undefined)
             return res.status(400).send({status : false, message : "bookId is required."});
         
         const bookId = req.params.bookId;
@@ -32,13 +32,10 @@ const createReview = async function(req,res)
         
         let {review,rating,reviewedBy} = req.body;
 
-        if(!validators.isValidField(review))
-            return res.status(400).send({status : false, message : "review is required."});
-
         if(!validators.isValidField(rating))
             return res.status(400).send({status : false, message : "rating is required."});
         
-        if(/[1-5]/.test(rating))
+        if(!(/[1-5]/.test(rating)))
             return res.status(400).send({status : false, message : "rating should be a number from 1 to 5."});
 
         if(!validators.isValidField(reviewedBy))
@@ -51,9 +48,12 @@ const createReview = async function(req,res)
  
         const reviewData = {bookId,reviewedBy,reviewedAt : new Date(),rating,review};
 
+        if(review==undefined)
+            delete reviewData.review;
+
         const newReview = await reviewModel.create(reviewData);
         
-        await bookModel.findOneAndUpdate({_id : bookId, isDeleted : false},{$inc : {rating : 1}});
+        await bookModel.findOneAndUpdate({_id : bookId, isDeleted : false},{$inc : {reviews : 1}});
 
         return res.status(201).send({status : true,message : "Review created successfully.", data : newReview});
     }
@@ -69,7 +69,7 @@ const updateReview = async function(req,res)
 {
     try
     {
-        if(req.params.bookId!=undefined)
+        if(req.params.bookId==undefined)
             return res.status(400).send({status : false, message : "bookId is required."});
     
         const bookId = req.params.bookId;
@@ -109,7 +109,15 @@ const updateReview = async function(req,res)
             updatedReviewDetails['rating']=requestBody.rating;
         
         if(validators.isValidField(requestBody.reviewedBy))
-            updatedReviewDetails['reviewedBy']=requestBody.reviewedBy;
+        {    
+            let userExists = await userModel.findOne({name : requestBody.reviewedBy, isDeleted: false});
+
+            if(!userExists)
+                updatedReviewDetails['reviewedBy']=='Guest';
+
+            else
+                updatedReviewDetails['reviewedBy']=requestBody.reviewedBy;
+        }
 
         let updatedReview = await reviewModel.findByIdAndUpdate(reviewId,updatedReviewDetails,{new : true});
         
@@ -127,7 +135,7 @@ const deleteReview = async function(req,res)
 {
     try
     {
-        if(req.params.bookId!=undefined)
+        if(req.params.bookId==undefined)
             return res.status(400).send({status : false, message : "bookId is required."});
         
         const bookId = req.params.bookId;
