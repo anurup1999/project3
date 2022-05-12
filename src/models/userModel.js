@@ -1,4 +1,8 @@
+// ================ imports ===========================================================================================//
+
 const mongoose = require("mongoose");
+
+// ================ User Schema ===========================================================================================//
 
 const userSchema = new mongoose.Schema(
 {
@@ -39,5 +43,7 @@ const userSchema = new mongoose.Schema(
                 },
 },{ timestamps: true }
 );
+
+// ================ exports ===========================================================================================//
 
 module.exports = mongoose.model("users", userSchema);

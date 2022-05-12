@@ -1,4 +1,8 @@
+// ================ imports ===========================================================================================//
+
 const jwt = require('jsonwebtoken');
+
+// ================ Authentication Middleware ===========================================================================================//
 
 const authentication = async function (req, res, next) 
 {
@@ -25,5 +29,7 @@ const authentication = async function (req, res, next)
         res.status(500).send({status: false, msg: error.message})
     }
 };
+
+// ================ exports ===========================================================================================//
 
 module.exports.authentication=authentication;

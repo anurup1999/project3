@@ -61,8 +61,7 @@ const createUser = async function(req,res)
             let {pincode}=address;
             if(validators.isValidField(pincode))
             {
-                console.log(pincode);
-                if(!validators.isValidPincode(pincode))
+                if(!(/^[^0][0-9]{2}[0-9]{3}$/.test(pincode)))
                 {
                     return res.status(400).send({status : false,message : "Pincode should be a valid pincode number."}); 
                 }
@@ -111,7 +110,7 @@ const loginUser = async function (req, res)
 
             let payload = { _id: userEmail._id };
 
-            let token = jwt.sign(payload, 'projectThird', { expiresIn: '1800s' });
+            let token = jwt.sign(payload, 'projectThird', { expiresIn: '3600s' });
 
             res.header('x-api-key', token);
 

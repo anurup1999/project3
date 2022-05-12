@@ -1,5 +1,9 @@
+// ================ imports ===========================================================================================//
+
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Schema.Types.ObjectId
+
+// ================ Book Schema ===========================================================================================//
 
 const bookSchema = new mongoose.Schema(
 {
@@ -32,7 +36,7 @@ const bookSchema = new mongoose.Schema(
                 trim: true
               },
   subcategory : {
-                  type: String,
+                  type: [String],
                   required: true,
                   trim: true
                 },
@@ -42,17 +46,19 @@ const bookSchema = new mongoose.Schema(
               // Holds number of reviews of this book.
             },
   deletedAt : {
-                type: Date,
+                type: Date
               },
   isDeleted : {
                 type: Boolean,
                 default: false
               },
   releasedAt : {
-                  type: Date,
+                  type: String,
                   required: true
                },
 },{ timestamps: true }
 );
+
+// ================ exports ===========================================================================================//
 
 module.exports = mongoose.model("books", bookSchema);
