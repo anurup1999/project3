@@ -37,14 +37,6 @@ const createReview = async function(req,res)
         
         if(!(/[1-5]/.test(rating)))
             return res.status(400).send({status : false, message : "rating should be a number from 1 to 5."});
-
-        if(!validators.isValidField(reviewedBy))
-            return res.staus(400).send({status : false, message : "reviewedBy is required."});
-
-        let userExists = await userModel.findOne({name : reviewedBy, isDeleted: false});
-
-        if(!userExists)
-            reviewedBy='Guest';
  
         const reviewData = {bookId,reviewedBy,reviewedAt : new Date(),rating,review};
 
@@ -53,9 +45,9 @@ const createReview = async function(req,res)
 
         const newReview = await reviewModel.create(reviewData);
         
-        await bookModel.findOneAndUpdate({_id : bookId, isDeleted : false},{$inc : {reviews : 1}});
+        const updatedBook = await bookModel.findOneAndUpdate({_id : bookId, isDeleted : false},{$inc : {reviews : 1}},{new : true});
 
-        return res.status(201).send({status : true,message : "Review created successfully.", data : newReview});
+        return res.status(201).send({status : true,message : "Review created successfully.", data : {...updatedBook.toObject(),newReview}});
     }
     catch(error)
     {
@@ -109,15 +101,7 @@ const updateReview = async function(req,res)
             updatedReviewDetails['rating']=requestBody.rating;
         
         if(validators.isValidField(requestBody.reviewedBy))
-        {    
-            let userExists = await userModel.findOne({name : requestBody.reviewedBy, isDeleted: false});
-
-            if(!userExists)
-                updatedReviewDetails['reviewedBy']=='Guest';
-
-            else
-                updatedReviewDetails['reviewedBy']=requestBody.reviewedBy;
-        }
+            updatedReviewDetails['reviewedBy']=requestBody.reviewedBy;
 
         let updatedReview = await reviewModel.findByIdAndUpdate(reviewId,updatedReviewDetails,{new : true});
         

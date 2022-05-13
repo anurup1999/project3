@@ -266,7 +266,7 @@ const deleteBookById = async function (req,res)
         if ( req.validToken._id != book.userId) 
             return res.status(403).send({ status: false, message: 'Unauthorised access ! Owner info does not match' });
         
-        await bookModel.findOneAndUpdate({_id : req.params.bookId},{isDeleted : true});
+        await bookModel.findOneAndUpdate({_id : req.params.bookId},{isDeleted : true , deletedAt : new Date()});
         return res.status(200).send({status : true,message : "Book deleted successfully."});
     }
     catch(error)
