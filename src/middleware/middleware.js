@@ -15,12 +15,14 @@ const authentication = async function (req, res, next)
             
             res.status(400).send({ status: false, msg: "request is missing a mandatory token header" });
 
-        const decodedToken = jwt.verify(token, 'projectThird');
-
-        if (!decodedToken)
-            
-            res.status(400).send({status: false, msg: "user not found"});
+        const decodedToken = jwt.decode(token);
         
+        if(decodedToken._id==undefined)
+        
+            return res.status(401).send({status : false , message : "Invalid Token."});
+
+        decodedToken = jwt.verify(token,'projectThird');
+
         req.validToken = decodedToken;
         next();
     }
