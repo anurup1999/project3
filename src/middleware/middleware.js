@@ -2,6 +2,8 @@
 
 const jwt = require('jsonwebtoken');
 
+const userModel = require('../models/userModel');
+
 // ================ Authentication Middleware ===========================================================================================//
 
 const authentication = async function (req, res, next) 
@@ -11,24 +13,30 @@ const authentication = async function (req, res, next)
     { 
         const token = req.headers['x-api-key'];
         
-        if (!token) 
-            
+        if (!token)     
             res.status(400).send({ status: false, msg: "request is missing a mandatory token header" });
 
         const decodedToken = jwt.decode(token);
         
-        if(decodedToken._id==undefined)
-        
+        if(decodedToken._id == undefined)
             return res.status(401).send({status : false , message : "Invalid Token."});
 
+        if(Date.now() > decodedToken.exp*1000)
+            return res.status(401).send({status : false , message : "Token Expired."});
+        
         decodedToken = jwt.verify(token,'projectThird');
 
+        let user = await userModel.findOne({_id : decodedToken._id});
+
+        if(!user)
+            return res.status(401).send({status : false , message : "User not found. Authentication failed."});
+        
         req.validToken = decodedToken;
         next();
     }
     catch (error) 
     {
-        res.status(500).send({status: false, msg: error.message})
+        return res.status(500).send({status: false, msg: error.message})
     }
 };
 
