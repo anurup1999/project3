@@ -62,16 +62,15 @@ const createBook = async function (req, res)
         if (!validators.isValidField(subcategory)) 
             return res.status(400).send('subcategory is required.');
 
-        if(/^\[(['"]\w+['"],?)+\]$/.test(subcategory))
+        if(validators.isValidField(subcategory))
         {
-            let temp = JSON.parse(subcategory);
-            subcategory = temp;
-        }
-        
-        if(/((['"])?\w+(['"])?,?)+/.test(subcategory))
-        {
-            let temp = subcategory.split(',');
-            subcategory = temp;
+            let temp = subcategory;
+
+            if(typeof(subcategory)=='object')
+                subcategory = temp;
+            
+            else
+                subcategory = temp.split(',').map(String);
         }
 
         if (!validators.isValidField(releasedAt)) 
@@ -121,21 +120,15 @@ const getBooks = async function (req,res)
         
         if(req.query.subcategory)
         {    
-            let subcategory = req.query.subcategory;
+            let temp = req.query.subcategory;
 
-            if(/^\[(['"]\w+['"],?)+\]$/.test(subcategory))
-            {
-                let temp = JSON.parse(subcategory);
+            if(typeof(subcategory)=='object')
                 subcategory = temp;
-            }
             
-            if(/((['"])?\w+(['"])?,?)+/.test(subcategory))
-            {
-                let temp = subcategory.split(',');
-                subcategory = temp;
-            }
+            else
+                subcategory = temp.split(',').map(String);
 
-            filter['subcategory']={$in : subcategory};
+            filter['subcategory']={$in : temp};
         }
 
         let books = await bookModel.find(filter,{ _id : 1,title : 1, excerpt : 1, userId : 1, category : 1,  reviews : 1, releasedAt : 1 }).sort({title : 1});
