@@ -1,9 +1,10 @@
-# project3
+# -----Team 3-----
 
------Team 3-----
-
+ Team Members - Abi Mangalan, Surojit Piri, Shreya Singh, Anurup Chakraborty
 
 # Uranium
+
+# project3
 
 ## Project - Books Management
 
